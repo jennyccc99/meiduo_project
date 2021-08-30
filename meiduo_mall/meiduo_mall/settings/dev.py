@@ -10,12 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 # 开发环境配置文件
-import os
+import os,sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-print(BASE_DIR)#/Users/jenniec/projects/meiduo_project/meiduo_mall/meiduo_mall
-
+#print(BASE_DIR)#/Users/jenniec/projects/meiduo_project/meiduo_mall/meiduo_mall
+print(sys.path)#导包路径
+#sys.path.insert(0,'/Users/jenniec/projects/meiduo_project/meiduo_mall/meiduo_mall/apps')
+sys.path.insert(0, os.path.join(BASE_DIR, "apps"))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
@@ -37,6 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'users',
+    "contents",
+    "verifications",
 ]
 
 MIDDLEWARE = [
@@ -98,7 +103,7 @@ DATABASES = {
         'NAME': 'meiduo' # 数据库名字
     }
 }
-#配置Redis数据库
+# 配置Redis数据库
 CACHES = {
     "default": { # 默认
         "BACKEND": "django_redis.cache.RedisCache",
@@ -110,6 +115,13 @@ CACHES = {
     "session": { # session
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://172.16.241.2:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    },
+    "verify_code": { # 验证码
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://172.16.241.2:6379/2",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
@@ -155,6 +167,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+# 配置静态文件加载路径
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 # 配置工程日志
 LOGGING = {
@@ -197,3 +211,10 @@ LOGGING = {
         },
     }
 }
+# 指定自定义的用户模型类，语法：子应用.用户模型类
+AUTH_USER_MODEL = 'users.User'
+
+# 指定自定义用户登陆认证后段
+AUTHENTICATION_BACKENDS = ['users.utils.UsernameMobileBackend']
+# 判断用户是否登陆后，指定未登陆用户重定向的地址
+LOGIN_URL = '/login/'
